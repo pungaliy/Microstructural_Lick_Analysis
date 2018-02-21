@@ -1,35 +1,43 @@
 import csv
 import sys
+import glob
+import os
 
 
 class Parameters:
+
     """Standardized to hold all parameters in milliseconds:
     false_licks, pause_criterion are provided in milliseconds by user
     meal_criterion, session_duration, are provided in seconds by user"""
     def __init__(self, folder, false_licks, pause_criterion, meal_criterion, session_duration, bins, on_column,
                  off_column):
-        self.folder = folder.strip()
-        self.false_licks = int(false_licks)
-        self.pause_criterion = int(pause_criterion)
-        self.meal_criterion = int(meal_criterion) * 1000
-        self.session_duration = int(session_duration) * 1000
-        self.bins = int(bins)
+        self.false_licks = float(false_licks)
+        self.pause_criterion = float(pause_criterion)
+        self.meal_criterion = float(meal_criterion) * 1000
+        self.session_duration = float(session_duration) * 1000
+        self.bins = float(bins)
         self.on_column = on_column.strip()
         self.off_column = off_column.strip()
 
+        if not os.path.exists(folder):
+            raise OSError("Error: Folder {} not found".format(folder))
+
+        self.files = []
+        for filename in glob.glob(os.path.join(folder, '*.csv')):
+            self.files.append(filename)
+
     def __str__(self):
-        ret_string = "Folder with files     : {folder}\n" \
-                     "False Licks (ms)      : {false_licks}\n" \
-                     "Pause Criterion (ms)  : {pause_criterion}\n" \
-                     "Meal Criterion (ms)   : {meal_criterion}\n" \
-                     "Session Duration (ms) : {session_duration}\n" \
-                     "Number of bins        : {bins}\n" \
-                     "On Column             : {on_column}\n" \
-                     "Off Column            : {off_column}\n"\
-            .format(folder=self.folder, false_licks=self.false_licks, pause_criterion=self.pause_criterion,
-                    meal_criterion=self.meal_criterion, session_duration=self.session_duration,
-                    bins=self.bins, on_column=self.on_column, off_column=self.off_column)
-        return ret_string
+        return "False Licks (ms)      : {false_licks}\n" \
+               "Pause Criterion (ms)  : {pause_criterion}\n" \
+               "Meal Criterion (ms)   : {meal_criterion}\n" \
+               "Session Duration (ms) : {session_duration}\n" \
+               "Number of bins        : {bins}\n" \
+               "On Column             : {on_column}\n" \
+               "Off Column            : {off_column}\n" \
+               "Folder with files     : {files}\n" \
+                .format(files=self.files, false_licks=self.false_licks, pause_criterion=self.pause_criterion,
+                        meal_criterion=self.meal_criterion, session_duration=self.session_duration,
+                        bins=self.bins, on_column=self.on_column, off_column=self.off_column)
 
 
 def extract_params():
@@ -45,12 +53,15 @@ def extract_params():
             return Parameters(*p)
 
     except IOError:
-        print "Error: File {} does not appear to exist.".format(filename)
+        print "Error: Parameter file {} does not appear to exist.".format(filename)
         exit()
     except ValueError:
         print "Error: One or more of your parameter values is of an incorrect type. \n" \
-              "It is likely that it is one of the criteria that are meant to be seconds, milliseconds, or an integer"
+              "It is likely that it is one of the criteria \nthat are meant to be seconds, milliseconds, or an integer"
+        exit()
+    except OSError as e:
+        print e
         exit()
 
 
-print extract_params()
+# print extract_params()
