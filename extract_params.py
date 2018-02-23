@@ -15,7 +15,7 @@ class Parameters:
         self.pause_criterion = float(pause_criterion)
         self.meal_criterion = float(meal_criterion) * 1000
         self.session_duration = float(session_duration) * 1000
-        self.bins = float(bins)
+        self.bins = int(bins)
         self.on_column = on_column.strip()
         self.off_column = off_column.strip()
 

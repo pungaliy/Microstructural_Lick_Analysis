@@ -51,6 +51,7 @@ def create_lick_time_pairs(pure_data):
     while i <= len(pure_data) - 1:
         if pure_data[i][on] and pure_data[i+1][off]:
             lick_pairs.append((pure_data[i][time], pure_data[i+1][time]))
+            i += 1
         i += 1
     return lick_pairs
 
@@ -75,6 +76,21 @@ def get_bursts(pairs, pause_threshold):
     return bursts
 
 
+def get_bins(pairs):
+    time_int = params.session_duration /params.bins
+    curr_time = time_int
+    bins = []
+    bin= pairs[0]
+    for i in range(1, len(pairs)):
+        if pairs[i][stop] <= curr_time:
+            bin.append(pairs[i])
+        else:
+            bins.append(bin)
+            bin = [pairs[i]]
+        curr_time += time_int
+    return bins
+
+
 def get_meals(bursts, meal_threshold):
     meals = []
     meal = [bursts[0]]
@@ -91,17 +107,27 @@ def get_duration_of(pairs):
     return pairs[len(pairs)-1][stop] - pairs[0][start]
 
 
+def mean_lick_duration(pairs):
+    total_lick = 0
+    for i in range(0, len(pairs)):
+        total_lick += pairs[i][end] - pairs[i][start]
+    return total_lick/len(pairs)
+
+
+def mean_interlick_interval(pairs):
+    total_int = 0
+    for i in range(1, len(pairs)):
+        total_int += pairs[i][start] - pairs[i-1][stop]
+    return total_int/len(pairs)
+
 params = extract_params.extract_params()
 print params
 for f in params.files:
     all_data = extract_column_location_information(f)
     lick_pairs = create_lick_time_pairs(all_data)
     lick_pairs_without_false = remove_false_pairs(lick_pairs, params.false_licks)
+
     print len(lick_pairs_without_false)
-
-
-
-
 
 
 
