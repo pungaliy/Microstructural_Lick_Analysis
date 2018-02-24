@@ -8,14 +8,14 @@ class Parameters:
 
     """Standardized to hold all parameters in milliseconds:
     false_licks, pause_criterion are provided in milliseconds by user
-    meal_criterion, session_duration, are provided in seconds by user"""
+    meal_criterion, session_duration, and bins are provided in seconds by user"""
     def __init__(self, folder, false_licks, pause_criterion, meal_criterion, session_duration, bins, on_column,
                  off_column):
         self.false_licks = float(false_licks)
         self.pause_criterion = float(pause_criterion)
         self.meal_criterion = float(meal_criterion) * 1000
-        self.session_duration = float(session_duration) * 1000
-        self.bins = int(bins)
+        self.session_duration = int(session_duration) * 1000
+        self.bins = int(bins) * 1000
         self.on_column = on_column.strip()
         self.off_column = off_column.strip()
 

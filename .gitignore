@@ -101,3 +101,5 @@ ENV/
 .mypy_cache/
 
 *.csv
+~$Value_Function_Classification.xlsx
+.idea/
