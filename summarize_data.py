@@ -54,15 +54,13 @@ class AnimalInfo:
                     on_col = titles.index(AnimalInfo.params.on_column)
                     off_col = titles.index(AnimalInfo.params.off_column)
                 except ValueError:
-                    print "One of the columns you entered doesn't exist in the file {}\n" \
-                          "Continuing to the next file...\n".format(filename)
-                    return None
+                    raise ValueError("One of the columns you entered doesn't exist in the file {x}\n"
+                                     "Continuing to the next file...\n".format(x=filename))
 
                 try:
                     time_col = titles.index("Time")
                 except ValueError:
-                    time_col = 7
-                    print "Assuming the 'time' column is the '{}' column...\n".format(titles[time_col])
+                    raise ValueError("Unable to find column labeled 'Time'")
 
                 pure_data = []
                 if on_col >= 0 and off_col >= 0 and time_col >= 0:
@@ -80,6 +78,8 @@ class AnimalInfo:
     @staticmethod
     def filter_data(pairs):
         """Filter the data by removing all false licks"""
+        if not pairs:
+            raise ValueError("Invalid data")
         return [(beg, end) for beg, end in pairs if end - beg > AnimalInfo.params.false_licks]
 
     @staticmethod
@@ -89,6 +89,9 @@ class AnimalInfo:
         if time < 0:
             return len(data)
 
+        if not data:
+            raise ValueError("Invalid data")
+
         start_time = data[0][start]
         return len([(beg, end) for beg, end in data if end < start_time + time])
 
@@ -97,13 +100,15 @@ class AnimalInfo:
         """Separate the given pairs into bursts"""
         bursts = []
         burst = [pairs[0]]
-        print pairs
         for i in range(1, len(pairs)):
             if pairs[i][start] - pairs[i - 1][stop] < AnimalInfo.params.pause_criterion:
                 burst.append(pairs[i])
             else:
                 bursts.append(burst)
                 burst = [pairs[i]]
+
+        if len(burst) != 0:
+            bursts.append(burst)
         return bursts
 
     @staticmethod
@@ -111,7 +116,7 @@ class AnimalInfo:
         """Return the mean burst size"""
         if not bursts:
             return 0
-        size = 0
+        size = 0.0
         for burst in bursts:
             size += len(burst)
         return size/len(bursts)
@@ -134,7 +139,7 @@ class AnimalInfo:
     @staticmethod
     def get_mean_interlick_interval(pairs):
         """Get the mean interval between each pair of licks"""
-        total_int = 0
+        total_int = 0.0
         for i in range(1, len(pairs)):
             total_int += pairs[i][start] - pairs[i - 1][stop]
         return total_int / len(pairs)
@@ -201,7 +206,7 @@ class AnimalInfo:
         meals.append(AnimalInfo.Meal(meals_data[len(meals_data)-1], 0))
 
         return [
-            ["Meal: "] + ["Meal {}".format(x) for x in range(1, len(meals)+1)],
+            ["Meal: "] + ["Meal {x}".format(x=x) for x in range(1, len(meals)+1)],
             ["Total Licks"] + [m.total_licks for m in meals],
             ["Total Licks in Minute 1"] + [m.total_licks_in_minute for m in meals],
             ["Total Licks in Burst 1"] + [m.total_licks_in_first_burst for m in meals],
@@ -233,7 +238,7 @@ class AnimalInfo:
             bins.append(AnimalInfo.Bins(bins_data[x]))
 
         return [
-            ["Bin: "] + ["Bin {}".format(x) for x in range(1, len(bins) + 1)],
+            ["Bin: "] + ["Bin {x}".format(x=x) for x in range(1, len(bins) + 1)],
             ["Mean Interlick Interval"] + [b.mean_interlick_interval for b in bins],
             ["Mean Lick Duration"] + [b.mean_lick_duration for b in bins],
             ["Number of Bursts"] + [b.number_of_bursts for b in bins],
@@ -265,4 +270,7 @@ if os.path.exists("output.csv"):
     os.remove("output.csv")
 
 for f in AnimalInfo.params.files:
-    AnimalInfo(f).output_data("output.csv")
+    try:
+        AnimalInfo(f).output_data("output.csv")
+    except Exception:
+        print "Invalid file: " + f

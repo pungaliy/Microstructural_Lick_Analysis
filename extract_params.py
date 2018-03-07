@@ -20,7 +20,7 @@ class Parameters:
         self.off_column = off_column.strip()                    # The column name for the column of "off" values
 
         if not os.path.exists(folder):
-            raise OSError("Error: Folder {} not found".format(folder))
+            raise OSError("Error: Folder {x} not found".format(x=folder))
 
         self.files = []
         for filename in glob.glob(os.path.join(folder, '*.csv')):
@@ -54,7 +54,7 @@ def extract_params():
             return Parameters(*p)
 
     except IOError:
-        print "Error: Parameter file {} does not appear to exist.".format(filename)
+        print "Error: Parameter file {x} does not appear to exist.".format(x=filename)
         exit()
     except ValueError:
         print "Error: One or more of your parameter values is of an incorrect type. \n" \
