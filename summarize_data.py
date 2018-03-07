@@ -21,8 +21,6 @@ class AnimalInfo:
         self.filtered_data = AnimalInfo.filter_data(self.pure_data)
         self.bursts = AnimalInfo.create_bursts(self.filtered_data)
 
-        self.create_session_info()
-
         self.session_info_lists = self.create_session_info()
         self.meal_info_lists = self.create_meal_info_lists()
         self.bin_info_lists = self.create_bin_info_lists()
@@ -183,6 +181,7 @@ class AnimalInfo:
     def create_meal_info_lists(self):
         """Create the output information for each meal"""
         def get_meals(pairs):
+            """Creates meal groups of data"""
             all_meals = []
             single_meal = [pairs[0]]
             for i in range(1, len(pairs)):
@@ -192,15 +191,17 @@ class AnimalInfo:
                     all_meals.append(single_meal)
                     single_meal = [pairs[i]]
             return all_meals
+
         meals_data = get_meals(self.filtered_data)
-        meals = []
-        for x in range(0, len(meals_data)-1):
-            print meals_data[x]
-            lat = meals_data[x+1][0][start] - meals_data[x][len(meals_data[x]) - 1][stop]
-            meals.append(AnimalInfo.Meal(meals_data[x], lat))
+        meals = []  # Holds meal objects
+        for meal in range(0, len(meals_data)-1):
+            # print meals_data[meal]
+            latency = meals_data[meal+1][0][start] - meals_data[meal][len(meals_data[meal]) - 1][stop]
+            meals.append(AnimalInfo.Meal(meals_data[meal], latency))
         meals.append(AnimalInfo.Meal(meals_data[len(meals_data)-1], 0))
 
         return [
+            ["Meal: "] + ["Meal {}".format(x) for x in range(1, len(meals)+1)],
             ["Total Licks"] + [m.total_licks for m in meals],
             ["Total Licks in Minute 1"] + [m.total_licks_in_minute for m in meals],
             ["Total Licks in Burst 1"] + [m.total_licks_in_first_burst for m in meals],
@@ -232,6 +233,7 @@ class AnimalInfo:
             bins.append(AnimalInfo.Bins(bins_data[x]))
 
         return [
+            ["Bin: "] + ["Bin {}".format(x) for x in range(1, len(bins) + 1)],
             ["Mean Interlick Interval"] + [b.mean_interlick_interval for b in bins],
             ["Mean Lick Duration"] + [b.mean_lick_duration for b in bins],
             ["Number of Bursts"] + [b.number_of_bursts for b in bins],
@@ -245,13 +247,16 @@ class AnimalInfo:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([self.name])
             csv_writer.writerow([])
+
             csv_writer.writerow(["Session:"])
             csv_writer.writerows(self.session_info_lists)  # Should be in form [["ABC", "DEF"], [...], ...]
             csv_writer.writerow([])
-            csv_writer.writerow(["Meals:"])
+
+            # csv_writer.writerow(["Meals:"])
             csv_writer.writerows(self.meal_info_lists)
             csv_writer.writerow([])
-            csv_writer.writerow(["Bins:"])
+
+            # csv_writer.writerow(["Bins:"])
             csv_writer.writerows(self.bin_info_lists)
             csv_writer.writerows([[], []])
 
