@@ -1,5 +1,5 @@
 import csv
-import sys
+# import sys
 import glob
 import os
 
@@ -43,8 +43,8 @@ class Parameters:
 def extract_params():
     """Get a parameter object containing all necessary user input"""
     filename = "param_file.csv"
-    if len(sys.argv) >= 2:
-        filename = sys.argv[1]
+    # if len(sys.argv) >= 2:
+    #     filename = sys.argv[1]
 
     try:
         with open(filename) as csvDataFile:

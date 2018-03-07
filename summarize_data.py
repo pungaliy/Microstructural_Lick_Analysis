@@ -13,6 +13,20 @@ stop = 1
 class AnimalInfo:
     params = extract_params.extract_params()
 
+    def __init__(self, filename):
+        """Initialize the class so that the output function can use it"""
+        self.name = filename
+
+        self.pure_data = AnimalInfo.extract_pure_data(self.name)
+        self.filtered_data = AnimalInfo.filter_data(self.pure_data)
+        self.bursts = AnimalInfo.create_bursts(self.filtered_data)
+
+        self.create_session_info()
+
+        self.session_info_lists = self.create_session_info()
+        self.meal_info_lists = self.create_meal_info_lists()
+        self.bin_info_lists = self.create_bin_info_lists()
+
     @staticmethod
     def extract_pure_data(name):
         """Simply extract the timestamp, on value, and off value for every column in the data"""
@@ -126,20 +140,6 @@ class AnimalInfo:
         for i in range(1, len(pairs)):
             total_int += pairs[i][start] - pairs[i - 1][stop]
         return total_int / len(pairs)
-
-    def __init__(self, filename):
-        """Initialize the class so that the output function can use it"""
-        self.name = filename
-
-        self.pure_data = AnimalInfo.extract_pure_data(self.name)
-        self.filtered_data = AnimalInfo.filter_data(self.pure_data)
-        self.bursts = AnimalInfo.create_bursts(self.filtered_data)
-
-        self.create_session_info()
-
-        self.session_info_lists = self.create_session_info()
-        self.meal_info_lists = self.create_meal_info_lists()
-        self.bin_info_lists = self.create_bin_info_lists()
 
     def create_session_info(self):
         """Create a list of information for the session"""
@@ -256,7 +256,8 @@ class AnimalInfo:
             csv_writer.writerows([[], []])
 
 
+if os.path.exists("output.csv"):
+    os.remove("output.csv")
+
 for f in AnimalInfo.params.files:
-    if os.path.exists("output.csv"):
-        os.remove("output.csv")
     AnimalInfo(f).output_data("output.csv")
