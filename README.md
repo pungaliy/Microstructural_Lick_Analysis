@@ -1,7 +1,7 @@
 # Microstructural Lick Analysis
 ### Pre-installation
 For now, we only have a version of this that works with python 2.7. Please confirm that you have this version following these steps:
-https://edu.google.com/openonline/course-builder/docs/1.10/set-up-course-builder/check-for-python.html
+https://edu.google.com/openonline/course-builder/docs/1.10/set-up-course-builder/check-for-python.html  
 If you don't have python 2.7, follow this webpage to install it (it will likely be python 2.7.14):
 https://wiki.python.org/moin/BeginnersGuide/Download
 ### Installing and Running the program
