@@ -11,13 +11,13 @@ class Parameters:
     meal_criterion, session_duration, and bins are provided in seconds by user"""
     def __init__(self, folder, false_licks, pause_criterion, meal_criterion, session_duration, bins, on_column,
                  off_column):
-        self.false_licks = float(false_licks)
-        self.pause_criterion = float(pause_criterion)
-        self.meal_criterion = float(meal_criterion) * 1000
-        self.session_duration = int(session_duration) * 1000
-        self.bins = int(bins) * 1000
-        self.on_column = on_column.strip()
-        self.off_column = off_column.strip()
+        self.false_licks = float(false_licks)                   # Threshold for false licks
+        self.pause_criterion = float(pause_criterion)           # Threshold for a burst
+        self.meal_criterion = float(meal_criterion) * 1000      # Threshold for a meal
+        self.session_duration = int(session_duration) * 1000    # Length of the session
+        self.bins = int(bins) * 1000                            # Length of a bin
+        self.on_column = on_column.strip()                      # The column name for the column of "on" values
+        self.off_column = off_column.strip()                    # The column name for the column of "off" values
 
         if not os.path.exists(folder):
             raise OSError("Error: Folder {} not found".format(folder))
@@ -41,6 +41,7 @@ class Parameters:
 
 
 def extract_params():
+    """Get a parameter object containing all necessary user input"""
     filename = "param_file.csv"
     if len(sys.argv) >= 2:
         filename = sys.argv[1]

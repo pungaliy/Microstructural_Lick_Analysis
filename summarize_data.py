@@ -2,6 +2,8 @@ import csv
 import extract_params
 import os
 
+
+# Constants
 on = 1
 off = 2
 start = 0
@@ -13,6 +15,7 @@ class AnimalInfo:
 
     @staticmethod
     def extract_pure_data(name):
+        """Simply extract the timestamp, on value, and off value for every column in the data"""
 
         def create_lick_time_pairs(pure_data):
             time = 0
@@ -64,10 +67,13 @@ class AnimalInfo:
 
     @staticmethod
     def filter_data(pairs):
+        """Filter the data by removing all false licks"""
         return [(beg, end) for beg, end in pairs if end - beg > AnimalInfo.params.false_licks]
 
     @staticmethod
     def total_licks(data, time=-1):
+        """Find the total number of licks within a given time. If no time is given, just return the total number
+        of licks"""
         if time < 0:
             return len(data)
 
@@ -76,6 +82,7 @@ class AnimalInfo:
 
     @staticmethod
     def create_bursts(pairs):
+        """Separate the given pairs into bursts"""
         bursts = []
         burst = [pairs[0]]
         print pairs
@@ -89,6 +96,7 @@ class AnimalInfo:
 
     @staticmethod
     def mean_burst_size(bursts):
+        """Return the mean burst size"""
         if not bursts:
             return 0
         size = 0
@@ -98,10 +106,12 @@ class AnimalInfo:
 
     @staticmethod
     def get_duration(data):
+        """Return the duration of a given set of data"""
         return data[len(data) - 1][stop] - data[0][start]
 
     @staticmethod
     def mean_burst_duration(bursts):
+        """Return the mean burst duration of a given set of bursts"""
         if not bursts:
             return 0
         durations = 0
@@ -111,12 +121,14 @@ class AnimalInfo:
 
     @staticmethod
     def get_mean_interlick_interval(pairs):
+        """Get the mean interval between each pair of licks"""
         total_int = 0
         for i in range(1, len(pairs)):
             total_int += pairs[i][start] - pairs[i - 1][stop]
         return total_int / len(pairs)
 
     def __init__(self, filename):
+        """Initialize the class so that the output function can use it"""
         self.name = filename
 
         self.pure_data = AnimalInfo.extract_pure_data(self.name)
@@ -130,6 +142,7 @@ class AnimalInfo:
         self.bin_info_lists = self.create_bin_info_lists()
 
     def create_session_info(self):
+        """Create a list of information for the session"""
         return [
             ["Absolute total licks", AnimalInfo.total_licks(self.pure_data)],
             ["Total filtered licks", AnimalInfo.total_licks(self.filtered_data)],
@@ -145,6 +158,7 @@ class AnimalInfo:
             ]
 
     class Meal:
+        """Class to hold meal data (does computations within initializer)"""
         def __init__(self, pure_data, latency_to_next):
             bursts = AnimalInfo.create_bursts(pure_data)
             self.total_licks = AnimalInfo.total_licks(pure_data)
@@ -157,6 +171,7 @@ class AnimalInfo:
             self.latency_to_next = latency_to_next
 
     class Bins:
+        """Class to hold bin data (does computations within initializer)"""
         def __init__(self, pure_data):
             bursts = AnimalInfo.create_bursts(pure_data)
             self.mean_interlick_interval = AnimalInfo.get_mean_interlick_interval(pure_data)
@@ -166,6 +181,7 @@ class AnimalInfo:
             self.mean_burst_duration = AnimalInfo.mean_burst_duration(bursts)
 
     def create_meal_info_lists(self):
+        """Create the output information for each meal"""
         def get_meals(pairs):
             all_meals = []
             single_meal = [pairs[0]]
@@ -196,6 +212,7 @@ class AnimalInfo:
         ]
 
     def create_bin_info_lists(self):
+        """Create the output information for each bin"""
 
         def get_bins(pairs):
             all_bins = []
@@ -223,6 +240,7 @@ class AnimalInfo:
         ]
 
     def output_data(self, output_file):
+        """Use the output functions to create all necessary output information & write each them as rows to the file"""
         with open(output_file, 'a') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([self.name])
