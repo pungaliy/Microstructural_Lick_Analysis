@@ -1,4 +1,4 @@
-# Microstructural Lick Analysis
+# Microstructural Lick Analysis Instructions
 ### Pre-installation
 For now, we only have a version of this that works with python 2.7. Please confirm that you have this version following these steps:
 https://edu.google.com/openonline/course-builder/docs/1.10/set-up-course-builder/check-for-python.html
@@ -30,7 +30,7 @@ https://wiki.python.org/moin/BeginnersGuide/Download
 ##### Running the program
 - Once you are in this directory, which should contain the four files mentioned above as well as a folder containing the csv files, run the following command in command prompt/terminal: ```python summarize_data.py```
 - Your results should be placed in a file called output.csv located in the Microstructural_Lick_Analysis-master" folder
-- Note that the program **will overwrite** the output.csv folder each time it is run. If you'd like to save the results, move the file to a different folder.
+- Note that the program **will overwrite** the output.csv file each time it is run. If you'd like to save the results, move the file to a different folder.
 
 
 
