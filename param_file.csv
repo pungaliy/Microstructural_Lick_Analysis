@@ -1,2 +1,2 @@
 Folder of files to analyze, Minimum ILI filter (in ms), Pause Criterion (ms), Meal criterion (in s), Session Duration (in s), Time per Bin, Lickometer On Channel/Column, Lickometer Off Channel/Column
-Sample Schier Lick Time Stamp Files,10,300,20,10,3, On1A1, Off1A1
+test_folder,200,300,20,10,60, On1A1, Off1A1

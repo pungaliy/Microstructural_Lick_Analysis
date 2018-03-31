@@ -80,7 +80,21 @@ class AnimalInfo:
         """Filter the data by removing all false licks"""
         if not pairs:
             raise ValueError("Invalid data")
-        return [(beg, end) for beg, end in pairs if end - beg > AnimalInfo.params.false_licks]
+
+        to_remove = []
+        for i in range(1, len(pairs)):
+            # if pairs[i][start] - pairs[i-1][stop] < 200:
+            if pairs[i][start] - pairs[i-1][stop] < AnimalInfo.params.false_licks:
+                to_remove.append(i)
+
+        count = 0
+        for index in to_remove:
+            pairs.pop(index-count)
+            count += 1
+
+        print count
+
+        return pairs
 
     @staticmethod
     def total_licks(data, time=-1):
@@ -98,6 +112,8 @@ class AnimalInfo:
     @staticmethod
     def create_bursts(pairs):
         """Separate the given pairs into bursts"""
+        if not pairs:
+            return []
         bursts = []
         burst = [pairs[0]]
         for i in range(1, len(pairs)):
@@ -123,6 +139,8 @@ class AnimalInfo:
 
     @staticmethod
     def get_duration(data):
+        if not data:
+            return data
         """Return the duration of a given set of data"""
         return data[len(data) - 1][stop] - data[0][start]
 
@@ -139,10 +157,22 @@ class AnimalInfo:
     @staticmethod
     def get_mean_interlick_interval(pairs):
         """Get the mean interval between each pair of licks"""
+        if not pairs:
+            return 0
         total_int = 0.0
         for i in range(1, len(pairs)):
             total_int += pairs[i][start] - pairs[i - 1][stop]
         return total_int / len(pairs)
+
+    @staticmethod
+    def get_mean_lick_duration(pairs):
+        if not pairs:
+            return 0
+        total_int = 0.0
+        for pair in pairs:
+            total_int += pair[stop] - pair[start]
+        return total_int / len(pairs)
+
 
     def create_session_info(self):
         """Create a list of information for the session"""
@@ -177,8 +207,9 @@ class AnimalInfo:
         """Class to hold bin data (does computations within initializer)"""
         def __init__(self, pure_data):
             bursts = AnimalInfo.create_bursts(pure_data)
+            self.total_licks = len(pure_data)
             self.mean_interlick_interval = AnimalInfo.get_mean_interlick_interval(pure_data)
-            self.mean_lick_duration = AnimalInfo.get_duration(pure_data) / len(pure_data)
+            self.mean_lick_duration = AnimalInfo.get_mean_lick_duration(pure_data)
             self.number_of_bursts = len(bursts)
             self.mean_burst_size = AnimalInfo.mean_burst_size(bursts)
             self.mean_burst_duration = AnimalInfo.mean_burst_duration(bursts)
@@ -199,6 +230,8 @@ class AnimalInfo:
 
         meals_data = get_meals(self.filtered_data)
         meals = []  # Holds meal objects
+        if not meals_data:
+            return meals
         for meal in range(0, len(meals_data)-1):
             # print meals_data[meal]
             latency = meals_data[meal+1][0][start] - meals_data[meal][len(meals_data[meal]) - 1][stop]
@@ -222,15 +255,21 @@ class AnimalInfo:
 
         def get_bins(pairs):
             all_bins = []
-            single_bin = [pairs[0]]
+            single_bin = []
             current_threshold = AnimalInfo.params.bins
-            for i in range(1, len(pairs)):
-                if pairs[i][start] - pairs[i - 1][stop] < current_threshold:
-                    single_bin.append(pairs[i])
+            count = 0
+
+            for pair in pairs:
+                if pair[stop] <= current_threshold:
+                    single_bin.append(pair)
                 else:
-                    current_threshold += AnimalInfo.params.bins
                     all_bins.append(single_bin)
-                    single_bin = [pairs[i]]
+                    single_bin = [pair]
+                    current_threshold += AnimalInfo.params.bins
+
+            if single_bin:
+                all_bins.append(single_bin)
+
             return all_bins
         bins_data = get_bins(self.filtered_data)
         bins = []
@@ -239,6 +278,7 @@ class AnimalInfo:
 
         return [
             ["Bin: "] + ["Bin {x}".format(x=x) for x in range(1, len(bins) + 1)],
+            ["Total Filtered Licks: "] + [b.total_licks for b in bins],
             ["Mean Interlick Interval"] + [b.mean_interlick_interval for b in bins],
             ["Mean Lick Duration"] + [b.mean_lick_duration for b in bins],
             ["Number of Bursts"] + [b.number_of_bursts for b in bins],
@@ -248,7 +288,8 @@ class AnimalInfo:
 
     def output_data(self, output_file):
         """Use the output functions to create all necessary output information & write each them as rows to the file"""
-        with open(output_file, 'a') as csv_file:
+
+        with open(output_file, 'ab') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([self.name])
             csv_writer.writerow([])
@@ -270,7 +311,8 @@ if os.path.exists("output.csv"):
     os.remove("output.csv")
 
 for f in AnimalInfo.params.files:
-    try:
-        AnimalInfo(f).output_data("output.csv")
-    except Exception:
-        print "Invalid file: " + f
+    # try:
+    AnimalInfo(f).output_data("output.csv")
+    # except Exception as e:
+    #     print e
+    #     print "Invalid file: " + f

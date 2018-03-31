@@ -15,7 +15,7 @@ class Parameters:
         self.pause_criterion = float(pause_criterion)           # Threshold for a burst
         self.meal_criterion = float(meal_criterion) * 1000      # Threshold for a meal
         self.session_duration = int(session_duration) * 1000    # Length of the session
-        self.bins = int(bins) * 1000                            # Length of a bin
+        self.bins = float(bins) * 1000                            # Length of a bin
         self.on_column = on_column.strip()                      # The column name for the column of "on" values
         self.off_column = off_column.strip()                    # The column name for the column of "off" values
 
