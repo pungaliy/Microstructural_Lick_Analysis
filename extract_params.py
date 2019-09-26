@@ -9,11 +9,13 @@ class Parameters:
     """Standardized to hold all parameters in milliseconds:
     false_licks, pause_criterion are provided in milliseconds by user
     meal_criterion, session_duration, and bins are provided in seconds by user"""
-    def __init__(self, folder, false_licks, pause_criterion, meal_criterion, session_duration, bins, on_column,
-                 off_column):
+    def __init__(self, folder, false_licks, pause_criterion, meal_criterion, false_start_lick_thresh,
+            false_start_win_size, session_duration, bins, on_column, off_column):
         self.false_licks = float(false_licks)                   # Threshold for false licks
         self.pause_criterion = float(pause_criterion)           # Threshold for a burst
         self.meal_criterion = float(meal_criterion) * 1000      # Threshold for a meal
+        self.false_start_lick_thresh = int(false_start_lick_thresh) # Number of licks required to avoid false starts
+        self.false_start_win_size = int(false_start_win_size)   # Size of false start detection window (ms)
         self.session_duration = int(session_duration) * 1000    # Length of the session
         self.bins = float(bins) * 1000                            # Length of a bin
         self.on_column = on_column.strip()                      # The column name for the column of "on" values
@@ -30,14 +32,19 @@ class Parameters:
         return "False Licks (ms)      : {false_licks}\n" \
                "Pause Criterion (ms)  : {pause_criterion}\n" \
                "Meal Criterion (ms)   : {meal_criterion}\n" \
+               "False Start Lick Thresh : {false_start_lick_thresh}\n" \
+               "False Start Detection Window Size (ms) : {false_start_win_size}\n" \
                "Session Duration (ms) : {session_duration}\n" \
                "Number of bins        : {bins}\n" \
                "On Column             : {on_column}\n" \
                "Off Column            : {off_column}\n" \
                "Folder with files     : {files}\n" \
                 .format(files=self.files, false_licks=self.false_licks, pause_criterion=self.pause_criterion,
-                        meal_criterion=self.meal_criterion, session_duration=self.session_duration,
-                        bins=self.bins, on_column=self.on_column, off_column=self.off_column)
+                        meal_criterion=self.meal_criterion,
+                        false_start_lick_thresh=self.false_start_lick_thresh,
+                        false_start_win_size=self.false_start_win_size,
+                        session_duration=self.session_duration,bins=self.bins, on_column=self.on_column,
+                        off_column=self.off_column)
 
 
 def extract_params():

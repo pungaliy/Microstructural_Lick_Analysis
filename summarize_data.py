@@ -18,7 +18,10 @@ class AnimalInfo:
         self.name = filename
 
         self.pure_data = AnimalInfo.extract_pure_data(self.name)
-        self.filtered_data = AnimalInfo.filter_data(self.pure_data)
+        self.filtered_data = AnimalInfo.filter_false_licks(self.pure_data)
+        self.filtered_data = AnimalInfo.filter_false_starts(self.filtered_data)
+        if not self.filtered_data:
+            raise ValueError("Data set empty after filtering. Tweak param_file.csv false lick/start settings.")
         self.bursts = AnimalInfo.create_bursts(self.filtered_data)
 
         self.session_info_lists = self.create_session_info()
@@ -76,14 +79,57 @@ class AnimalInfo:
         return create_lick_time_pairs(extract_column_location_information(name))
 
     @staticmethod
-    def filter_data(pairs):
+    def filter_false_starts(pairs):
+        """Filter the data by removing false start entries.
+
+        If we define a window of X milliseconds and a threshold number of licks Y, then we can say our true
+        data set begins when the subject has completed Y licks in the last X milliseconds. Filtering
+        false starts means removing all intervals whose [start time, start_time+X] window produced less
+        than Y licks. The filter algorithm is O(n^2) where n is the number of tuples in pairs. May
+        be worth improving if the data sets get significantly larger.
+
+        Parameters
+        ----------
+        pairs: list(tuple)
+            List of lick start/end time pairs.
+
+        Returns
+        -------
+        list(tuple)
+            A list of lick start/end time pairs satisfying the filter.
+
+        Raises
+        ------
+        ValueError
+            If an empty pairs list is passed in as a parameter.
+        """
+        if not pairs:
+            raise ValueError("filter_false_starts() error: invalid data")
+
+        for i, lick_pair in enumerate(pairs):
+            window_start_time = lick_pair[start]
+            window_end_time = window_start_time + AnimalInfo.params.false_start_win_size
+            lick_ctr = 0
+
+            for p in pairs[i:]:
+                if p[stop] <= window_end_time:
+                    lick_ctr += 1
+                if lick_ctr >= AnimalInfo.params.false_start_lick_thresh:
+                    # Success, at least one interval was able to satisfy the filter conditions.
+                    # All following intervals, including this one, represent valid lick data.
+                    return pairs[i:]
+
+        # Bad news, no interval has passed the filter.
+        return None
+
+    @staticmethod
+    def filter_false_licks(pairs):
         """Filter the data by removing all false licks"""
         if not pairs:
             raise ValueError("Invalid data")
 
         to_remove = []
         for i in range(1, len(pairs)):
-            # if pairs[i][start] - pairs[i-1][stop] < 200:
             if pairs[i][start] - pairs[i-1][stop] < AnimalInfo.params.false_licks:
                 to_remove.append(i)
 
@@ -91,8 +137,6 @@ class AnimalInfo:
         for index in to_remove:
             pairs.pop(index-count)
             count += 1
-
-        print count
 
         return pairs
 
@@ -313,6 +357,7 @@ if os.path.exists("output.csv"):
 for f in AnimalInfo.params.files:
     # try:
     AnimalInfo(f).output_data("output.csv")
+    print AnimalInfo.params
     # except Exception as e:
     #     print e
     #     print "Invalid file: " + f
